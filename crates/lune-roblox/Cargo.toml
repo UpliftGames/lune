@@ -19,10 +19,10 @@ glam = "0.30"
 rand = "0.9"
 thiserror = "2.0"
 
-rbx_binary = "1.0"
-rbx_dom_weak = "3.0"
-rbx_reflection = "5.0"
-rbx_reflection_database = "1.0"
-rbx_xml = "1.0"
+rbx_binary = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
+rbx_dom_weak = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
+rbx_reflection = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
+rbx_reflection_database = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
+rbx_xml = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
 
 lune-utils = { version = "0.2.1", path = "../lune-utils" }
