@@ -38,11 +38,13 @@ local patch_number = string.match(luneVersion[3], "^(%d+).*$")
 assert(tonumber(patch_number) ~= nil, "_VERSION global lune patch version is not a number")
 assert(tonumber(versions[2]) ~= nil, "_VERSION global luau version is not a number")
 
+local rebuilt_patch = table.concat(luneVersion, ".", 3)
+
 local rebuilt = string.format(
-	"Lune %d.%d.%d+%d",
+	"Lune %d.%d.%s+%d",
 	tonumber(luneVersion[1]) :: number,
 	tonumber(luneVersion[2]) :: number,
-	tonumber(luneVersion[3]) :: number,
+	rebuilt_patch,
 	tonumber(versions[2]) :: number
 )
 
