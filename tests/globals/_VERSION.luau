@@ -33,7 +33,9 @@ assert(
 
 assert(tonumber(luneVersion[1]) ~= nil, "_VERSION global lune major version is not a number")
 assert(tonumber(luneVersion[2]) ~= nil, "_VERSION global lune minor version is not a number")
-assert(tonumber(luneVersion[3]) ~= nil, "_VERSION global lune patch version is not a number")
+assert(luneVersion[3] ~= nil, "_VERSION global lune version did not have a patch component")
+local patch_number = string.match(luneVersion[3], "^(%d+).*$")
+assert(tonumber(patch_number) ~= nil, "_VERSION global lune patch version is not a number")
 assert(tonumber(versions[2]) ~= nil, "_VERSION global luau version is not a number")
 
 local rebuilt = string.format(
