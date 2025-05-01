@@ -1,6 +1,6 @@
 [package]
 name = "lune-roblox"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/lune-org/lune"
@@ -25,4 +25,4 @@ rbx_reflection = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66
 rbx_reflection_database = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
 rbx_xml = { git = "https://github.com/UpliftGames/rbx-dom.git", rev = "66e21b397f6e064d86fa6c8d530ce541864b1d2e" }
 
-lune-utils = { version = "0.2.1", path = "../lune-utils" }
+lune-utils = { version = "0.2.2", path = "../lune-utils" }

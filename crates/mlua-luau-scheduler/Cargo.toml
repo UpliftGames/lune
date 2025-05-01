@@ -1,6 +1,6 @@
 [package]
 name = "mlua-luau-scheduler"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/lune-org/lune"
@@ -18,8 +18,6 @@ workspace = true
 [dependencies]
 async-executor = "1.13"
 blocking = "1.6"
-concurrent-queue = "2.5"
-event-listener = "5.4"
 futures-lite = "2.6"
 rustc-hash = "2.1"
 tracing = "0.1"

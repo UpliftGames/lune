@@ -3,6 +3,7 @@
 use lune_utils::TableBuilder;
 use mlua::prelude::*;
 
+pub(crate) mod body;
 pub(crate) mod client;
 pub(crate) mod server;
 pub(crate) mod shared;
@@ -32,6 +33,8 @@ pub fn typedefs() -> String {
     Errors when out of memory.
 */
 pub fn module(lua: Lua) -> LuaResult<LuaTable> {
+    // No initial rustls setup is necessary, the respective
+    // functions lazily initialize anything there as needed
     TableBuilder::new(lua)?
         .with_async_function("request", net_request)?
         .with_async_function("socket", net_socket)?
