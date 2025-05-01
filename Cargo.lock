@@ -1819,6 +1819,7 @@ dependencies = [
  "lune-utils",
  "mlua",
  "mlua-luau-scheduler",
+ "os_str_bytes",
  "pin-project",
 ]
 
@@ -1900,7 +1901,6 @@ dependencies = [
  "console",
  "dunce",
  "mlua",
- "os_str_bytes",
  "parking_lot",
  "path-clean",
  "pathdiff",

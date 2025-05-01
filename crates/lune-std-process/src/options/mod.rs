@@ -1,11 +1,9 @@
 use std::{
     collections::HashMap,
     env::{self},
-    ffi::OsString,
     path::PathBuf,
 };
 
-use lune_utils::process::ProcessArgs;
 use mlua::prelude::*;
 
 use async_process::Command;
@@ -131,24 +129,31 @@ impl FromLua for ProcessSpawnOptions {
 }
 
 impl ProcessSpawnOptions {
-    pub fn into_command(self, program: impl Into<OsString>, args: ProcessArgs) -> Command {
-        let mut program: OsString = program.into();
-        let mut args = args.into_iter().collect::<Vec<_>>();
+    pub fn into_command(self, program: impl Into<String>, args: Option<Vec<String>>) -> Command {
+        let mut program = program.into();
 
         // Run a shell using the command param if wanted
-        if let Some(shell) = self.shell {
-            let mut shell_command = program.clone();
-            for arg in args {
-                shell_command.push(" ");
-                shell_command.push(arg);
+        let pargs = match self.shell {
+            None => args,
+            Some(shell) => {
+                let shell_args = match args {
+                    Some(args) => vec!["-c".to_string(), format!("{} {}", program, args.join(" "))],
+                    None => vec!["-c".to_string(), program.to_string()],
+                };
+                program = shell.to_string();
+                Some(shell_args)
             }
-            args = vec![OsString::from("-c"), shell_command];
-            program = shell.into();
-        }
+        };
 
         // Create command with the wanted options
-        let mut cmd = Command::new(program);
-        cmd.args(args);
+        let mut cmd = match pargs {
+            None => Command::new(program),
+            Some(args) => {
+                let mut cmd = Command::new(program);
+                cmd.args(args);
+                cmd
+            }
+        };
 
         // Set dir to run in and env variables
         if let Some(cwd) = self.cwd {
