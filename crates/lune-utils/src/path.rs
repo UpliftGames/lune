@@ -4,11 +4,10 @@ use std::{
     sync::Arc,
 };
 
-use once_cell::sync::Lazy;
 use path_clean::PathClean;
 
-static CWD: Lazy<Arc<Path>> = Lazy::new(create_cwd);
-static EXE: Lazy<Arc<Path>> = Lazy::new(create_exe);
+static CWD: std::sync::LazyLock<Arc<Path>> = std::sync::LazyLock::new(create_cwd);
+static EXE: std::sync::LazyLock<Arc<Path>> = std::sync::LazyLock::new(create_exe);
 
 fn create_cwd() -> Arc<Path> {
     let mut cwd = current_dir()

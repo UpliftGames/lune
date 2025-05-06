@@ -51,9 +51,18 @@ impl<'lua> DomValueToLua<'lua> for LuaValue<'lua> {
                 DomValue::Float32(n) => Ok(LuaValue::Number(*n as f64)),
                 DomValue::String(s) => Ok(LuaValue::String(lua.create_string(s)?)),
                 DomValue::BinaryString(s) => Ok(LuaValue::String(lua.create_string(s)?)),
-                DomValue::Content(s) => Ok(LuaValue::String(
+                DomValue::ContentId(s) => Ok(LuaValue::String(
                     lua.create_string(AsRef::<str>::as_ref(s))?,
                 )),
+                DomValue::Content(s) => Ok(match s.value() {
+                    dom::ContentType::None => LuaValue::String(lua.create_string("")?),
+                    dom::ContentType::Uri(s) => LuaValue::String(lua.create_string(s.as_bytes())?),
+                    dom::ContentType::Object(uri) => match Instance::new_opt(*uri) {
+                        Some(inst) => inst.into_lua(lua)?,
+                        None => LuaValue::Nil,
+                    },
+                    ty => panic!("unimplemented ContentType: {ty:?}"),
+                }),
 
                 // NOTE: Dom references may point to instances that
                 // no longer exist, so we handle that here instead of

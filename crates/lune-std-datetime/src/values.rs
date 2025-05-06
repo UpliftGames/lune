@@ -67,7 +67,6 @@ where
     since we generally want to convert into lua when we know we have
     a fixed point in time, and we guarantee that it doesn't change
 */
-
 impl FromLua<'_> for DateTimeValues {
     fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
         if !value.is_table() {
@@ -76,7 +75,7 @@ impl FromLua<'_> for DateTimeValues {
                 to: "DateTimeValues",
                 message: Some("value must be a table".to_string()),
             });
-        };
+        }
 
         let value = value.as_table().unwrap();
         let values = Self {
@@ -121,7 +120,6 @@ impl IntoLua<'_> for DateTimeValues {
     Conversion methods between chrono's timezone-aware `DateTime` to
     and from our non-timezone-aware `DateTimeValues` values struct
 */
-
 impl<T: TimeZone> From<DateTime<T>> for DateTimeValues {
     fn from(value: DateTime<T>) -> Self {
         Self {

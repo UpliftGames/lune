@@ -1,6 +1,6 @@
 use rbx_dom_weak::{
     types::{Ref as DomRef, VariantType as DomType},
-    Instance as DomInstance, WeakDom,
+    ustr, Instance as DomInstance, Ustr, WeakDom,
 };
 
 use crate::shared::instance::class_is_a;
@@ -14,12 +14,12 @@ pub fn postprocess_dom_for_model(dom: &mut WeakDom) {
     recurse_instances(dom, root_ref, &|inst| {
         // Get rid of some unique ids - roblox does not
         // save these in model files, and we shouldn't either
-        remove_matching_prop(inst, DomType::UniqueId, "UniqueId");
-        remove_matching_prop(inst, DomType::UniqueId, "HistoryId");
+        remove_matching_prop(inst, DomType::UniqueId, ustr("UniqueId"));
+        remove_matching_prop(inst, DomType::UniqueId, ustr("HistoryId"));
         // Similar story with ScriptGuid - this is used
         // in the studio-only cloud script drafts feature
-        if class_is_a(&inst.class, "LuaSourceContainer").unwrap_or(false) {
-            inst.properties.remove("ScriptGuid");
+        if class_is_a(inst.class, "LuaSourceContainer").unwrap_or(false) {
+            inst.properties.remove(&ustr("ScriptGuid"));
         }
     });
 }
@@ -40,8 +40,8 @@ where
     }
 }
 
-fn remove_matching_prop(inst: &mut DomInstance, ty: DomType, name: &'static str) {
-    if inst.properties.get(name).map_or(false, |u| u.ty() == ty) {
-        inst.properties.remove(name);
+fn remove_matching_prop(inst: &mut DomInstance, ty: DomType, name: Ustr) {
+    if inst.properties.get(&name).is_some_and(|u| u.ty() == ty) {
+        inst.properties.remove(&name);
     }
 }

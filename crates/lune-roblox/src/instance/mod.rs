@@ -8,10 +8,9 @@ use std::{
 };
 
 use mlua::prelude::*;
-use once_cell::sync::Lazy;
 use rbx_dom_weak::{
     types::{Attributes as DomAttributes, Ref as DomRef, Variant as DomValue},
-    Instance as DomInstance, InstanceBuilder as DomInstanceBuilder, WeakDom,
+    ustr, Instance as DomInstance, InstanceBuilder as DomInstanceBuilder, Ustr, WeakDom,
 };
 
 use lune_utils::TableBuilder;
@@ -31,13 +30,13 @@ pub mod registry;
 const PROPERTY_NAME_ATTRIBUTES: &str = "Attributes";
 const PROPERTY_NAME_TAGS: &str = "Tags";
 
-static INTERNAL_DOM: Lazy<Mutex<WeakDom>> =
-    Lazy::new(|| Mutex::new(WeakDom::new(DomInstanceBuilder::new("ROOT"))));
+static INTERNAL_DOM: std::sync::LazyLock<Mutex<WeakDom>> =
+    std::sync::LazyLock::new(|| Mutex::new(WeakDom::new(DomInstanceBuilder::new("ROOT"))));
 
 #[derive(Debug, Clone)]
 pub struct Instance {
     pub(crate) dom_ref: DomRef,
-    pub(crate) class_name: String,
+    pub(crate) class_name: Ustr,
 }
 
 impl Instance {
@@ -75,7 +74,7 @@ impl Instance {
 
             Some(Self {
                 dom_ref,
-                class_name: instance.class.clone(),
+                class_name: instance.class,
             })
         } else {
             None
@@ -91,10 +90,10 @@ impl Instance {
         any existing lock must first be released to prevent any deadlocking.
     */
     #[must_use]
-    pub fn new_orphaned(class_name: impl AsRef<str>) -> Self {
+    pub fn new_orphaned(class_name: impl Into<Ustr>) -> Self {
         let mut dom = INTERNAL_DOM.lock().expect("Failed to lock document");
 
-        let class_name = class_name.as_ref();
+        let class_name = class_name.into();
 
         let instance = DomInstanceBuilder::new(class_name.to_string());
 
@@ -103,7 +102,7 @@ impl Instance {
 
         Self {
             dom_ref,
-            class_name: class_name.to_string(),
+            class_name,
         }
     }
 
@@ -244,7 +243,7 @@ impl Instance {
           on the Roblox Developer Hub
     */
     pub fn is_a(&self, class_name: impl AsRef<str>) -> bool {
-        class_is_a(&self.class_name, class_name).unwrap_or(false)
+        class_is_a(self.class_name, class_name).unwrap_or(false)
     }
 
     /**
@@ -337,14 +336,14 @@ impl Instance {
     /**
         Gets a property for the instance, if it exists.
     */
-    pub fn get_property(&self, name: impl AsRef<str>) -> Option<DomValue> {
+    pub fn get_property(&self, name: impl Into<Ustr>) -> Option<DomValue> {
         INTERNAL_DOM
             .lock()
             .expect("Failed to lock document")
             .get_by_ref(self.dom_ref)
             .expect("Failed to find instance in document")
             .properties
-            .get(name.as_ref())
+            .get(&name.into())
             .cloned()
     }
 
@@ -354,14 +353,14 @@ impl Instance {
         Note that setting a property here will not fail even if the
         property does not actually exist for the instance class.
     */
-    pub fn set_property(&self, name: impl AsRef<str>, value: DomValue) {
+    pub fn set_property(&self, name: impl Into<Ustr>, value: DomValue) {
         INTERNAL_DOM
             .lock()
             .expect("Failed to lock document")
             .get_by_ref_mut(self.dom_ref)
             .expect("Failed to find instance in document")
             .properties
-            .insert(name.as_ref().to_string(), value);
+            .insert(name.into(), value);
     }
 
     /**
@@ -377,7 +376,7 @@ impl Instance {
             .get_by_ref(self.dom_ref)
             .expect("Failed to find instance in document");
         if let Some(DomValue::Attributes(attributes)) =
-            inst.properties.get(PROPERTY_NAME_ATTRIBUTES)
+            inst.properties.get(&ustr(PROPERTY_NAME_ATTRIBUTES))
         {
             attributes.get(name.as_ref()).cloned()
         } else {
@@ -398,7 +397,7 @@ impl Instance {
             .get_by_ref(self.dom_ref)
             .expect("Failed to find instance in document");
         if let Some(DomValue::Attributes(attributes)) =
-            inst.properties.get(PROPERTY_NAME_ATTRIBUTES)
+            inst.properties.get(&ustr(PROPERTY_NAME_ATTRIBUTES))
         {
             attributes.clone().into_iter().collect()
         } else {
@@ -425,14 +424,14 @@ impl Instance {
             value => value,
         };
         if let Some(DomValue::Attributes(attributes)) =
-            inst.properties.get_mut(PROPERTY_NAME_ATTRIBUTES)
+            inst.properties.get_mut(&ustr(PROPERTY_NAME_ATTRIBUTES))
         {
             attributes.insert(name.as_ref().to_string(), value);
         } else {
             let mut attributes = DomAttributes::new();
             attributes.insert(name.as_ref().to_string(), value);
             inst.properties.insert(
-                PROPERTY_NAME_ATTRIBUTES.to_string(),
+                ustr(PROPERTY_NAME_ATTRIBUTES),
                 DomValue::Attributes(attributes),
             );
         }
@@ -452,11 +451,11 @@ impl Instance {
             .get_by_ref_mut(self.dom_ref)
             .expect("Failed to find instance in document");
         if let Some(DomValue::Attributes(attributes)) =
-            inst.properties.get_mut(PROPERTY_NAME_ATTRIBUTES)
+            inst.properties.get_mut(&ustr(PROPERTY_NAME_ATTRIBUTES))
         {
             attributes.remove(name.as_ref());
             if attributes.is_empty() {
-                inst.properties.remove(PROPERTY_NAME_ATTRIBUTES);
+                inst.properties.remove(&ustr(PROPERTY_NAME_ATTRIBUTES));
             }
         }
     }
@@ -473,11 +472,11 @@ impl Instance {
         let inst = dom
             .get_by_ref_mut(self.dom_ref)
             .expect("Failed to find instance in document");
-        if let Some(DomValue::Tags(tags)) = inst.properties.get_mut(PROPERTY_NAME_TAGS) {
+        if let Some(DomValue::Tags(tags)) = inst.properties.get_mut(&ustr(PROPERTY_NAME_TAGS)) {
             tags.push(name.as_ref());
         } else {
             inst.properties.insert(
-                PROPERTY_NAME_TAGS.to_string(),
+                ustr(PROPERTY_NAME_TAGS),
                 DomValue::Tags(vec![name.as_ref().to_string()].into()),
             );
         }
@@ -495,7 +494,7 @@ impl Instance {
         let inst = dom
             .get_by_ref(self.dom_ref)
             .expect("Failed to find instance in document");
-        if let Some(DomValue::Tags(tags)) = inst.properties.get(PROPERTY_NAME_TAGS) {
+        if let Some(DomValue::Tags(tags)) = inst.properties.get(&ustr(PROPERTY_NAME_TAGS)) {
             tags.iter().map(ToString::to_string).collect()
         } else {
             Vec::new()
@@ -514,7 +513,7 @@ impl Instance {
         let inst = dom
             .get_by_ref(self.dom_ref)
             .expect("Failed to find instance in document");
-        if let Some(DomValue::Tags(tags)) = inst.properties.get(PROPERTY_NAME_TAGS) {
+        if let Some(DomValue::Tags(tags)) = inst.properties.get(&ustr(PROPERTY_NAME_TAGS)) {
             let name = name.as_ref();
             tags.iter().any(|tag| tag == name)
         } else {
@@ -534,14 +533,12 @@ impl Instance {
         let inst = dom
             .get_by_ref_mut(self.dom_ref)
             .expect("Failed to find instance in document");
-        if let Some(DomValue::Tags(tags)) = inst.properties.get_mut(PROPERTY_NAME_TAGS) {
+        if let Some(DomValue::Tags(tags)) = inst.properties.get_mut(&ustr(PROPERTY_NAME_TAGS)) {
             let name = name.as_ref();
             let mut new_tags = tags.iter().map(ToString::to_string).collect::<Vec<_>>();
             new_tags.retain(|tag| tag != name);
-            inst.properties.insert(
-                PROPERTY_NAME_TAGS.to_string(),
-                DomValue::Tags(new_tags.into()),
-            );
+            inst.properties
+                .insert(ustr(PROPERTY_NAME_TAGS), DomValue::Tags(new_tags.into()));
         }
     }
 
@@ -700,7 +697,7 @@ impl Instance {
 
         ### See Also
         * [`FindFirstDescendant`](https://create.roblox.com/docs/reference/engine/classes/Instance#FindFirstDescendant)
-            on the Roblox Developer Hub
+          on the Roblox Developer Hub
     */
     pub fn find_descendant<F>(&self, predicate: F) -> Option<Instance>
     where

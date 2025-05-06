@@ -2,11 +2,10 @@ use std::{env, path::PathBuf};
 
 use anyhow::{bail, Result};
 use mlua::Compiler as LuaCompiler;
-use once_cell::sync::Lazy;
 use tokio::fs;
 
-pub static CURRENT_EXE: Lazy<PathBuf> =
-    Lazy::new(|| env::current_exe().expect("failed to get current exe"));
+pub static CURRENT_EXE: std::sync::LazyLock<PathBuf> =
+    std::sync::LazyLock::new(|| env::current_exe().expect("failed to get current exe"));
 const MAGIC: &[u8; 8] = b"cr3sc3nt";
 
 /*

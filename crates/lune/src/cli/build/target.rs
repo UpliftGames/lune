@@ -1,16 +1,16 @@
 use std::{env::consts::ARCH, fmt, path::PathBuf, str::FromStr};
 
 use directories::BaseDirs;
-use once_cell::sync::Lazy;
 
-static HOME_DIR: Lazy<PathBuf> = Lazy::new(|| {
+static HOME_DIR: std::sync::LazyLock<PathBuf> = std::sync::LazyLock::new(|| {
     BaseDirs::new()
         .expect("could not find home directory")
         .home_dir()
         .to_path_buf()
 });
 
-pub static CACHE_DIR: Lazy<PathBuf> = Lazy::new(|| HOME_DIR.join(".lune").join("target"));
+pub static CACHE_DIR: std::sync::LazyLock<PathBuf> =
+    std::sync::LazyLock::new(|| HOME_DIR.join(".lune").join("target"));
 
 /**
     A target operating system supported by Lune

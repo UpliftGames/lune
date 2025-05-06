@@ -5,13 +5,13 @@ use std::{cmp::Ordering, ffi::OsStr, fmt::Write as _, path::PathBuf};
 use anyhow::{bail, Result};
 use console::Style;
 use directories::UserDirs;
-use once_cell::sync::Lazy;
 use tokio::{fs, io};
 
 use super::files::{discover_script_path, parse_lune_description_from_file};
 
-pub static COLOR_BLUE: Lazy<Style> = Lazy::new(|| Style::new().blue());
-pub static STYLE_DIM: Lazy<Style> = Lazy::new(|| Style::new().dim());
+pub static COLOR_BLUE: std::sync::LazyLock<Style> =
+    std::sync::LazyLock::new(|| Style::new().blue());
+pub static STYLE_DIM: std::sync::LazyLock<Style> = std::sync::LazyLock::new(|| Style::new().dim());
 
 pub async fn find_lune_scripts(in_home_dir: bool) -> Result<Vec<(String, String)>> {
     let base_path = if in_home_dir {

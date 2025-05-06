@@ -5,7 +5,6 @@ use std::{
 
 use console::{colors_enabled as get_colors_enabled, set_colors_enabled};
 use mlua::prelude::*;
-use once_cell::sync::Lazy;
 
 mod basic;
 mod config;
@@ -20,7 +19,8 @@ pub use self::config::ValueFormatConfig;
 // NOTE: Since the setting for colors being enabled is global,
 // and these functions may be called in parallel, we use this global
 // lock to make sure that we don't mess up the colors for other threads.
-static COLORS_LOCK: Lazy<Arc<Mutex<()>>> = Lazy::new(|| Arc::new(Mutex::new(())));
+static COLORS_LOCK: std::sync::LazyLock<Arc<Mutex<()>>> =
+    std::sync::LazyLock::new(|| Arc::new(Mutex::new(())));
 
 /**
     Formats a Lua value into a pretty string using the given config.

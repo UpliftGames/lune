@@ -4,11 +4,10 @@ use std::sync::Arc;
 
 use console::style;
 use mlua::prelude::*;
-use once_cell::sync::Lazy;
 
 use super::StackTrace;
 
-static STYLED_STACK_BEGIN: Lazy<String> = Lazy::new(|| {
+static STYLED_STACK_BEGIN: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
     format!(
         "{}{}{}",
         style("[").dim(),
@@ -17,7 +16,7 @@ static STYLED_STACK_BEGIN: Lazy<String> = Lazy::new(|| {
     )
 });
 
-static STYLED_STACK_END: Lazy<String> = Lazy::new(|| {
+static STYLED_STACK_END: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
     format!(
         "{}{}{}",
         style("[").dim(),
