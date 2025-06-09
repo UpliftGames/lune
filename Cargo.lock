@@ -2265,9 +2265,9 @@ dependencies = [
 
 [[package]]
 name = "rbx_cookie"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8a61b073240f4c13b1e780a8999a113dfa28bc93f2cf9fc41c6f36e7aceb5bf"
+checksum = "62d81c3d7cd53ac75f48a7b526e145d0b72c19d695364edb343e9248192d3f17"
 dependencies = [
  "byteorder 0.5.3",
  "cookie",
