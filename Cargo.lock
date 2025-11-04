@@ -1530,7 +1530,7 @@ dependencies = [
 
 [[package]]
 name = "lune"
-version = "0.8.9-uplift.4"
+version = "0.8.9-uplift.5"
 dependencies = [
  "anyhow",
  "clap",
