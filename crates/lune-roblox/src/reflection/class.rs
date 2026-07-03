@@ -128,7 +128,7 @@ impl fmt::Display for DatabaseClass {
 
 fn find_enum_name(inner: DbClass, name: impl AsRef<str>) -> Option<String> {
     inner.properties.iter().find_map(|(prop_name, prop_info)| {
-        if prop_name == name.as_ref() {
+        if *prop_name == name.as_ref() {
             if let DataType::Enum(enum_name) = &prop_info.data_type {
                 Some(enum_name.to_string())
             } else {
