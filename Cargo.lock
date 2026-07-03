@@ -1681,7 +1681,7 @@ dependencies = [
 
 [[package]]
 name = "lune"
-version = "0.8.9-uplift.7"
+version = "0.8.9-uplift.8"
 dependencies = [
  "anyhow",
  "clap",
